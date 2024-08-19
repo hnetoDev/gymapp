@@ -47,5 +47,9 @@
 		<true/>
 		<key>UIStatusBarHidden</key>
 		<false/>
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>Atualizar a foto de perfil do usuario</string>
+		<key>NSCameraUsageDescription</key>
+		<string>Tirar foto para ser usada de perfil</string>
 	</dict>
 </plist>

@@ -39,6 +39,7 @@ class _LoginPageState extends State<LoginPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               FadeInLeft(child: Container(width: MediaQuery.of(context).size.width,alignment: Alignment.center,child: Image.asset('assets/images/logo.png'))),
+              SizedBox(height: 20,),
               FadeInLeft(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -47,7 +48,7 @@ class _LoginPageState extends State<LoginPage> {
                     children: [
                       Text('Faça login',style: TextStyle(color: Colors.white,fontFamily: "JetBrains",fontWeight: FontWeight.bold,fontSize: 35),),
                       Text('no TEA',style: TextStyle(color: Colors.yellow,fontFamily: "JetBrains",fontWeight: FontWeight.bold,fontSize: 35),),
-                
+
                     ],
                   ),
                 ),
@@ -88,9 +89,11 @@ class _LoginPageState extends State<LoginPage> {
                             erros = false;
                           });
                         },
+                        obscureText: true,
                         style: TextStyle(color: Color(0xffa1a1a1)),
                         controller: passwordController,
                         decoration: InputDecoration(
+
                           label: Text('sua senha',style: TextStyle(fontFamily: "JetBrains"),),
                           border: InputBorder.none,
                           prefixIcon: Icon(Icons.lock_outline_sharp,color: Colors.yellow,),
@@ -103,6 +106,7 @@ class _LoginPageState extends State<LoginPage> {
                       ) : SizedBox(width: 0,height: 0,),
                       ElevatedButton(onPressed: ()async{
                         Future<void> login()async{
+                          print("Iniciando Login");
                           setState(() {
                             loading = true;
                           });
@@ -110,7 +114,9 @@ class _LoginPageState extends State<LoginPage> {
                             "email":emailController.text,
                             "password":passwordController.text
                           });
+
                           if(res != null){
+                            print('Retorno de usuario');
                             user = res;
                             setState(() {
                               loading = false;

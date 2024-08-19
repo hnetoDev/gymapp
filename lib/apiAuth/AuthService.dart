@@ -6,34 +6,50 @@ import 'package:http/http.dart' as http;
 
 
 class AuthService {
-  Uri urlRegister = Uri.parse('https://api-nvjt0eai8-hnetos-projects.vercel.app/api/user');
-  Uri urlLogin = Uri.parse('https://api-nvjt0eai8-hnetos-projects.vercel.app/api/user/auth');
+  Uri urlRegister = Uri.parse('https://api-tea.vercel.app/user');
+  Uri urlLogin = Uri.parse('https://api-tea.vercel.app/user/auth');
 
 
-  Future<bool> Register(UserModel req)async{
-    String data = req.toJson();
+  Future<int> Register(UserModel req)async{
+    String data = req.toJsonUpdate();
     final res = await http.post(urlRegister,body:data,headers: {
       "content-type": "application/json"
     });
-    if(res.statusCode == 200){
-      return true;
-    }
-    return false;
+    return res.statusCode;
   }
 
   Future<UserModel?> Login(Map<String,dynamic> data)async{
     final res = await http.post(urlLogin,body:jsonEncode(data),headers: {
       "content-type": "application/json"
     });
-    if(res.statusCode == 200){
-      final id = jsonDecode(res.body);
-      final getUser = await http.get(Uri.parse('https://api-b6gjphh37-hnetos-projects.vercel.app/api/user/$id'));
-      UserModel user = UserModel.fromJson(jsonDecode(getUser.body));
+    if(res.statusCode == 201){
+
+      final UserModel user = UserModel.fromJson(jsonDecode(res.body));
       final shared = await SharedServices().setLogin(user);
       return user;
     }
+
     return null;
   }
+
+  Future<int> Update(UserModel req)async{
+    String data = req.toJsonUpdate();
+    final UserModel? userPrev = await SharedServices().getData();
+
+    Uri urlUpdate = Uri.parse('https://api-tea.vercel.app/user/${userPrev!.id!}');
+    final res = await http.patch(urlUpdate,body: data,headers: {
+      "content-type": "application/json"
+    });
+
+    print(res.statusCode);
+    if(res.statusCode == 200 || res.statusCode == 201){
+      final UserModel user = UserModel.fromJson(jsonDecode(res.body));
+      print(user.id);
+      final shared = await SharedServices().setLogin(user);
+    }
+    return res.statusCode;
+  }
+
 
 
 

@@ -41,7 +41,7 @@ class _TreinadorPageState extends State<TreinadorPage> {
 
   List<Map<String,dynamic>> treinoDB = [
     {
-      'title': 'Supino reto',
+      'title': 'Supino reto aaaaaaaaa',
       'series': 4,
       'aparelho': 20,
       'img': 'assets/images/img.png',
@@ -144,7 +144,7 @@ class _TreinadorPageState extends State<TreinadorPage> {
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(title,style: TextStyle(color: Colors.yellow,fontFamily: "JetBrains",fontSize: 20),),
+                                    Text(title,style: TextStyle(color: Colors.yellow,fontFamily: "JetBrains",fontSize: 20,),),
                                     Text('Aparelho: $aparelho ',style: TextStyle(color: Color(0xffa1a1a1),fontFamily: "JetBrains"),),
                                   ],
                                 ),

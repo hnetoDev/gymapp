@@ -8,7 +8,7 @@ class SharedServices{
   Future<bool> isLogged()async{
     final shared = await SharedPreferences.getInstance();
     String? detais = await shared.getString('Login-details');
-    if(detais != ''){
+    if(detais != '' && detais != null){
       return true;
     }
     return false;

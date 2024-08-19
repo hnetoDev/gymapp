@@ -6,6 +6,7 @@ import 'package:appgym/apiAuth/AuthService.dart';
 import 'package:appgym/apiAuth/UserModel.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:validadores/Validador.dart';
 
@@ -23,6 +24,10 @@ class _RegisterPageState extends State<RegisterPage> {
   final __formKey = GlobalKey<FormState>();
 
   bool error = false;
+  bool registrado = false;
+  String? genero = '';
+  bool loading = false;
+  String? msgError = '';
 
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
@@ -48,12 +53,13 @@ class _RegisterPageState extends State<RegisterPage> {
 
 
 
+
   void handleBack(){
     double page = controller.page!;
     if(page == 0){
       return;
     }
-    if(page == 2){
+    if(page == 3){
       setState(() {
         btnText = 'Proximo';
       });
@@ -70,30 +76,59 @@ class _RegisterPageState extends State<RegisterPage> {
   Future<bool?> handleProx()async{
     double page = controller.page!;
 
-    if(page == 1){
+    if(page == 2){
       setState(() {
         btnText = 'Registrar-se';
       });
     }
-    if(page == 2){
+    if(page == 3 && (genero == '' || genero == null)){
+      setState(() {
+        genero=null;
+      });
+      return false;
+    }
+    if(page == 3){
       UserModel user = UserModel.fromJson({
         "name":nameController.text,
         "cpf":cpfController.text,
         "tel":telController.text,
         "emerg":emergController.text,
         "email":emailController.text,
-        "password":passwordController.text
+        "password":passwordController.text,
+        "genero": genero
       });
-      bool res = await AuthService().Register(user);
-      if(res == true){
+      setState(() {
+        loading=true;
+      });
+      int res = await AuthService().Register(user);
+      if(res == 201){
         return true;
-      } else{
-        print('error');
+      }
+      if(res == 600){
         setState(() {
           error = true;
+          loading = false;
+          msgError = 'EMAIL e CPF já registrados';
         });
         return false;
       }
+      if(res == 601){
+        setState(() {
+          error = true;
+          loading = false;
+          msgError = 'CPF já registrado';
+        });
+        return false;
+      }
+      if(res == 602){
+        setState(() {
+          error = true;
+          loading = false;
+          msgError = 'EMAIL já registrado';
+        });
+        return false;
+      }
+
 
     }
 
@@ -285,6 +320,62 @@ class _RegisterPageState extends State<RegisterPage> {
                                 ],
                               ),
                             ),
+                            FadeInLeft(
+                                child: Stack(
+                                  children: [
+                                    Positioned(
+                                      top: 16,
+                                      left: 10,
+                                      right: 10,
+                                      child: Column(
+                                        children: [
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                            crossAxisAlignment: CrossAxisAlignment.center,
+                                            children: [
+                                              GestureDetector(
+                                                onTap: (){
+                                                  setState(() {
+                                                    genero='m';
+                                                  });
+                                                },
+                                                child: Container(
+                                                  padding: EdgeInsets.all(20),
+                                                  decoration: BoxDecoration(
+                                                    color: Color(0xff121111),
+                                                    borderRadius: BorderRadius.circular(20),
+                                                    border: Border.all(width: 2,color: genero == 'm' ? Colors.blueAccent : Color(0xff121111) ),
+                                                  ),
+                                                  child: Icon(Icons.man,color: Colors.blue,size: 80,),
+                                                ),
+                                              ),
+                                              GestureDetector(
+                                                onTap: (){
+                                                  setState(() {
+                                                    genero='f';
+                                                  });
+                                                },
+                                                child: Container(
+                                                  padding: EdgeInsets.all(20),
+                                                  decoration: BoxDecoration(
+                                                    color: Color(0xff121111),
+                                                    borderRadius: BorderRadius.circular(20),
+                                                    border: Border.all(width: 2,color: genero == 'f' ? Colors.pinkAccent : Color(0xff121111) ),
+
+                                                  ),
+                                                  child: Icon(Icons.woman,color: Colors.pink,size: 80,),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          genero == null ? Text("Selecione seu genero",style: TextStyle(color: Colors.redAccent,fontFamily: 'JetBrains'),) : SizedBox(height: 0,),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                )
+                            ),
+
                           ],
                         ),
                         Positioned(child: Row(
@@ -294,14 +385,44 @@ class _RegisterPageState extends State<RegisterPage> {
                             SizedBox(width: 9,),
                             CircleAvatar(backgroundColor: Color(activePage == 1 ? 0xffFFFF00 : 0xff313131).withOpacity(0.5),radius: 5,),
                             SizedBox(width: 9,),
-                            CircleAvatar(backgroundColor: Color(activePage == 2 ? 0xffFFFF00 : 0xff313131).withOpacity(0.5),radius: 5,)
+                            CircleAvatar(backgroundColor: Color(activePage == 2 ? 0xffFFFF00 : 0xff313131).withOpacity(0.5),radius: 5,),
+                            SizedBox(width: 9,),
+                            CircleAvatar(backgroundColor: Color(activePage == 3 ? 0xffFFFF00 : 0xff313131).withOpacity(0.5),radius: 5,)
                           ],
                         ),
                           bottom: 120,
                           left: 24,
                           right: 30,
                         ),
-                        Positioned(bottom: 45,left: 10,right: 10,child: Row(
+                        Positioned(bottom: 45,left: 10,right: 10,child: error ? ElevatedButton(onPressed: (){
+                          setState(() {
+                            error=false;
+                          });
+                        }, child: Text('$msgError!, clique aqui para tentar novamente',style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "JetBrains",color: Colors.redAccent),)
+                        ,style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                              side: BorderSide(width: 1,color: Colors.yellow)
+                          ),
+                          backgroundColor: Color(0xff121111),
+                          padding: EdgeInsets.symmetric(vertical: 14,horizontal: activePage == 3 ? 31 : 48),
+                        ),)  : loading ? ElevatedButton(onPressed: (){}, child: CircularProgressIndicator(),style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                              side: BorderSide(width: 1,color: Colors.yellow)
+                          ),
+                          backgroundColor: Colors.transparent,
+                          padding: EdgeInsets.symmetric(vertical: 14,horizontal: activePage == 3 ? 31 : 48),
+                        ),)   : registrado ? ElevatedButton(onPressed: ()async{
+
+                        }, child: Text('Parebéns, usuario registrado!',style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "JetBrains",color: Colors.greenAccent),),style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                              side: BorderSide(width: 1,color: Colors.yellow)
+                          ),
+                          backgroundColor: Colors.transparent,
+                          padding: EdgeInsets.symmetric(vertical: 18,horizontal: activePage == 3 ? 31 : 48),
+                        ),) : Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             ElevatedButton(onPressed: ()async{
@@ -312,7 +433,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 side: BorderSide(width: 1,color: Colors.yellow)
                               ),
                               backgroundColor: Colors.transparent,
-                              padding: EdgeInsets.symmetric(vertical: 18,horizontal: activePage == 2 ? 31 : 48),
+                              padding: EdgeInsets.symmetric(vertical: 18,horizontal: activePage == 3 ? 31 : 48),
                             ),),
                             SizedBox(width: 8,),
                             ElevatedButton(onPressed: ()async{
@@ -320,9 +441,17 @@ class _RegisterPageState extends State<RegisterPage> {
                                 bool? register = await handleProx();
                                 setState(() {
                                   height=320;
+
                                 });
                                 if(register == true){
-                                  Navigator.push(context, MaterialPageRoute(builder: (context)=>LoginPage()));
+                                  setState(() {
+                                    loading = false;
+                                    registrado = true;
+                                  });
+                                  Future.delayed(Duration(milliseconds: 1500),(){
+                                    Navigator.push(context, MaterialPageRoute(builder: (context)=>LoginPage()));
+                                  });
+
                                 }
                               }
                             }, child: Text(btnText,style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "JetBrains",color: Colors.black),),style: ElevatedButton.styleFrom(
@@ -330,7 +459,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                   borderRadius: BorderRadius.circular(20)
                               ),
                               backgroundColor: Colors.yellow,
-                              padding: EdgeInsets.symmetric(vertical: 18,horizontal: activePage == 2 ? 43 : 48),
+                              padding: EdgeInsets.symmetric(vertical: 18,horizontal: activePage == 3 ? 43 : 48),
                             ),),
                           ],
                         ),),
